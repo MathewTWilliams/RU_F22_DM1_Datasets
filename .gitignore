@@ -2,7 +2,7 @@
 Images/
 /.vscode
 Weed-4class-*/
-/Negatives.csv
+Negatives/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

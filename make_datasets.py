@@ -1,8 +1,6 @@
 # Author: Matt Williams
 # Version: 9/2/2022
 
-
-from calendar import c
 import pandas as pd
 from shutil import copyfile
 from itertools import combinations
@@ -10,8 +8,10 @@ import os
 
 CWD = os.path.abspath(os.getcwd())
 LABELS_FILE = os.path.join(CWD, "labels.csv")
-NEGATIVES_FILE = os.path.join(CWD, "Negatives.csv")
 IMAGES_DIR = os.path.join(CWD, "Images")
+NEGATIVES_DIR = os.path.join(CWD, "Negatives")
+NEGATIVES_FILE = os.path.join(NEGATIVES_DIR, "Negatives.csv")
+COMBO_FILE_NAME = os.path.join(CWD, "combinations.csv")
 
 SPECIES_COL = "Species"
 FILENAME_COL = "Filename"
@@ -21,6 +21,11 @@ COMBO_COL = "Class Combination"
 
 NEGATIVE_CLASS = "Negative"
 NUM_CLASSES = 4
+
+
+def copy_and_move_images(): 
+    pass
+
 
 if __name__ == "__main__": 
     labels_df = pd.read_csv(LABELS_FILE)
@@ -35,7 +40,19 @@ if __name__ == "__main__":
 
         species_dict[species] = pd.concat([species_dict[species], file_df])
 
-    species_dict[NEGATIVE_CLASS].to_csv(NEGATIVES_FILE, index = False)
+
+    negative_df = species_dict[NEGATIVE_CLASS]
+
+    os.mkdir(NEGATIVES_DIR)
+    for i in range(len(negative_df.index)): 
+        file_df = negative_df.iloc[[i]]
+        file = file_df[FILENAME_COL].iloc[0]
+
+        src = os.path.join(IMAGES_DIR, file)
+        dst = os.path.join(NEGATIVES_DIR, file)
+        copyfile(src, dst)
+
+    negative_df.to_csv(NEGATIVES_FILE, index = False)
     species_list = [species for species in species_dict.keys() if species != NEGATIVE_CLASS]
     
     combos = combinations(species_list, NUM_CLASSES)    
