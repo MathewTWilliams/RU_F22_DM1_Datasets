@@ -1,5 +1,5 @@
 # Author: Matt Williams
-# Version: 9/3/2022
+# Version: 9/07/2022
 
 import pandas as pd
 from shutil import copyfile, rmtree
@@ -13,6 +13,7 @@ IMAGES_DIR = os.path.join(CWD, "Images")
 NEGATIVES_DIR = os.path.join(CWD, "Negatives")
 NEGATIVES_FILE = os.path.join(NEGATIVES_DIR, "Negatives.csv")
 COMBO_FILE_NAME = os.path.join(CWD, "combinations.csv")
+DATASETS_DIR = os.path.join(CWD, "Datasets")
 
 NEGATIVES_ZIP_FILE = "Negatives.zip"
 DATASET_DIRS_BASE_NAME = "Weed-4class-"
@@ -33,7 +34,7 @@ def sort_dataset():
 
     for i in range(len(labels_df.index)): 
         file_df = labels_df.iloc[[i]]
-        species = file_df[SPECIES_COL].iloc[0]
+        species = labels_df[SPECIES_COL].values[i]
         if species not in species_dict.keys(): 
             species_dict[species] = pd.DataFrame(columns=[FILENAME_COL, LABEL_COL, SPECIES_COL])
 
@@ -44,11 +45,11 @@ def sort_dataset():
 
 def make_negatives_zip(negative_df):
     os.mkdir(NEGATIVES_DIR)
+    os.mkdir(DATASETS_DIR)
 
-    with ZipFile(file = os.path.join(CWD, NEGATIVES_ZIP_FILE), mode = "w") as zip: 
+    with ZipFile(file = os.path.join(DATASETS_DIR, NEGATIVES_ZIP_FILE), mode = "w") as zip: 
         for i in range(len(negative_df.index)): 
-            file_df = negative_df.iloc[[i]]
-            file = file_df[FILENAME_COL].iloc[0]
+            file = negative_df[FILENAME_COL].values[i]
 
             src = os.path.join(IMAGES_DIR, file)
             dst = os.path.join(NEGATIVES_DIR, file)
@@ -76,13 +77,13 @@ def make_dataset_zip_files(species_dict):
         combo_df = pd.concat([combo_df, single_combo_df])
 
         new_labels_df = pd.DataFrame(columns = [FILENAME_COL, LABEL_COL, SPECIES_COL])
-        with ZipFile(file = os.path.join(CWD, directory_name+".zip"), mode = "w") as zip: 
+        with ZipFile(file = os.path.join(DATASETS_DIR, directory_name+".zip"), mode = "w") as zip: 
             for species in combo:
                 species_df = species_dict[species]
                 
                 for j in range(len(species_df.index)): 
                     file_df = species_df.iloc[[j]]
-                    file = file_df[FILENAME_COL].iloc[0]
+                    file = species_df[FILENAME_COL].values[j]
 
                     src = os.path.join(IMAGES_DIR, file)
                     dst = os.path.join(CWD, directory_name, file)
